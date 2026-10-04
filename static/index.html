@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScamShield</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#0f1b3d;--mute:#5b6784;--line:#dfe4f0;--brand:#1d3a8a;--ok:#2e7d32;--warn:#b26a00;--bad:#c62828}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1226;--card:#131c36;--ink:#e8ecf8;--mute:#9aa6c6;--line:#243056;--brand:#7da2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:28px 20px 8px;text-align:center}h1{margin:0;font-size:2rem}header p{margin:6px auto 0;max-width:640px;color:var(--mute)}
+main{max-width:920px;margin:0 auto;padding:16px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+h2{font-size:1.05rem;margin:0 0 10px}
+#drop{border:2px dashed var(--line);border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;color:var(--mute);transition:.15s}
+#drop.over,#drop:hover{border-color:var(--brand);background:rgba(125,162,255,.08)}
+#drop b{color:var(--ink);display:block;font-size:1.05rem;margin-bottom:4px}
+#files{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 0}
+.chip{position:relative;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:6px 30px 6px 6px;max-width:240px}
+.chip img{width:44px;height:44px;object-fit:cover;border-radius:6px}.chip .ic{width:44px;height:44px;display:grid;place-items:center;background:var(--bg);border-radius:6px;font-size:.75rem;font-weight:700}
+.chip span.n{font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chip button{position:absolute;right:4px;top:4px;border:0;background:none;color:var(--mute);cursor:pointer;font-size:1.1rem}
+textarea{width:100%;min-height:110px;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.ex{border:1px solid var(--line);background:none;color:var(--mute);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:.85rem}
+.ex:hover{color:var(--ink);border-color:var(--brand)}
+.btn{border:0;background:var(--brand);color:#fff;border-radius:12px;padding:12px 26px;font:inherit;font-weight:600;cursor:pointer}@media (prefers-color-scheme:dark){.btn{color:#0b1226}}
+.btn:disabled{opacity:.6;cursor:wait}.btn.ghost{background:none;color:var(--brand);border:1px solid var(--brand)}
+.mute{color:var(--mute);font-size:.85rem}#err{color:var(--bad);margin-top:10px;font-weight:600}
+.risk{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.gauge{width:130px;height:130px;position:relative}
+.gauge svg{transform:rotate(-90deg)}.gauge .v{position:absolute;inset:0;display:grid;place-items:center;font-size:1.9rem;font-weight:800}
+.badge{display:inline-block;color:#fff;padding:4px 14px;border-radius:999px;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:720px){.grid{grid-template-columns:1fr}}
+.flag{border-left:4px solid var(--warn);padding:6px 10px;margin:8px 0;background:var(--bg);border-radius:0 8px 8px 0}.flag small{display:block;color:var(--mute)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}.pill{font-size:.78rem;border-radius:999px;padding:3px 10px;border:1px solid var(--line)}
+.pill.ran{border-color:var(--ok);color:var(--ok)}.pill.not_checked{border-color:var(--warn);color:var(--warn)}.pill.skipped{color:var(--mute)}
+ul{margin:6px 0 10px;padding-left:20px}code,pre{background:var(--bg);border-radius:6px;padding:1px 5px;font-size:.85em}
+pre{padding:10px;white-space:pre-wrap;word-break:break-word;border:1px solid var(--line)}
+details{margin-top:10px}summary{cursor:pointer;color:var(--brand);font-weight:600}
+ol.tr{margin:6px 0;padding-left:22px}ol.tr li{margin:3px 0}.warn{background:rgba(178,106,0,.12);border:1px solid var(--warn);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ ScamShield</h1>
+  <p>Drop a screenshot, PDF or email file, or paste a message. An AI agent reads it, investigates it with specialised tools, scores the risk and tells you what to do.</p>
+</header>
+<main>
+  <section class="card" id="input">
+    <div id="drop" tabindex="0">
+      <b>📸 Drop screenshots or files here</b>
+      Click to browse, drag and drop, or paste an image (Ctrl/Cmd+V). Images, PDF, .eml and .txt, up to 4 files.
+      <input id="pick" type="file" multiple hidden accept="image/*,.pdf,.eml,.txt">
+    </div>
+    <div id="files"></div>
+    <textarea id="text" placeholder="Or paste the message text here..."></textarea>
+    <div class="row" id="examples"><span class="mute">Try:</span></div>
+    <div class="row"><button class="btn" id="go">Investigate</button><span class="mute" id="status"></span></div>
+    <div id="err"></div>
+    <p class="mute">Privacy: crop or blur OTPs, passwords and card numbers first. Uploads are sent to Google's Gemini API for reading and are not stored by this app.</p>
+    <p class="mute">Investigation uses specialised checks for message patterns, links, sender details, domain age and known scam scripts. External checks that cannot run are shown as <b>not checked</b>.</p>
+  </section>
+  <div id="out"></div>
+</main>
+<script>
+const API = window.SCAMSHIELD_API || "";
+const MAX_FILES = 4, MAX_BYTES = 8 * 1024 * 1024;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let files = [];
+
+const EXAMPLES = {
+  "Bank KYC": "URGENT: Dear customer, your SBI account will be blocked today. Update your KYC immediately: http://sbi-kyc-update.xyz/login",
+  "Parcel fee": "Your parcel is on hold due to an unpaid customs fee of $2.99. Pay now to reschedule delivery: bit.ly/3xParcel",
+  "Prize": "Congratulations! You've won a $500 Amazon gift card. Message me on Telegram to claim your prize and don't tell anyone.",
+  "Real order": "Hi, your Amazon order has shipped and will arrive on Thursday. You can track it in the Amazon app."
+};
+Object.entries(EXAMPLES).forEach(([k, v]) => {
+  const b = document.createElement("button"); b.className = "ex"; b.textContent = k;
+  b.onclick = () => { $("text").value = v; }; $("examples").appendChild(b);
+});
+
+function addFiles(list) {
+  for (const f of list) {
+    const ok = f.type.startsWith("image/") || /\.(pdf|eml|txt)$/i.test(f.name);
+    if (!ok) { $("err").textContent = `"${f.name}" isn't supported. Use an image, PDF, .eml or .txt.`; continue; }
+    if (f.size > MAX_BYTES) { $("err").textContent = `"${f.name}" is over 8 MB.`; continue; }
+    if (files.length >= MAX_FILES) { $("err").textContent = `Up to ${MAX_FILES} files.`; break; }
+    files.push(f);
+  }
+  renderFiles();
+}
+function renderFiles() {
+  $("files").innerHTML = "";
+  files.forEach((f, i) => {
+    const d = document.createElement("div"); d.className = "chip";
+    if (f.type.startsWith("image/")) { const im = document.createElement("img"); im.src = URL.createObjectURL(f); d.appendChild(im); }
+    else { const ic = document.createElement("div"); ic.className = "ic"; ic.textContent = (f.name.split(".").pop() || "file").toUpperCase(); d.appendChild(ic); }
+    const n = document.createElement("span"); n.className = "n"; n.textContent = f.name; d.appendChild(n);
+    const x = document.createElement("button"); x.textContent = "×"; x.title = "Remove"; x.onclick = () => { files.splice(i, 1); renderFiles(); };
+    d.appendChild(x); $("files").appendChild(d);
+  });
+}
+const drop = $("drop");
+drop.onclick = () => $("pick").click();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") $("pick").click(); };
+$("pick").onchange = e => { $("err").textContent = ""; addFiles(e.target.files); e.target.value = ""; };
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => { $("err").textContent = ""; addFiles(e.dataTransfer.files); });
+document.addEventListener("paste", e => {
+  const imgs = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith("image/"));
+  if (imgs.length) { e.preventDefault(); $("err").textContent = ""; addFiles(imgs); }
+});
+
+// minimal, safe markdown: escape first, then bold and bullets
+function md(s) {
+  const lines = esc(s).split("\n"); let html = "", list = false;
+  for (const l of lines) {
+    const t = l.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    if (/^\s*[-*] /.test(l)) { if (!list) { html += "<ul>"; list = true; } html += `<li>${t.replace(/^\s*[-*] /, "")}</li>`; }
+    else { if (list) { html += "</ul>"; list = false; } if (t.trim()) html += `<p style="margin:6px 0">${t}</p>`; }
+  }
+  return html + (list ? "</ul>" : "");
+}
+const ul = a => `<ul>${(a || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+
+function render(d) {
+  const r = d.risk, C = 2 * Math.PI * 52, off = C * (1 - r.score / 100);
+  const stepLabel = {ran: "checked", skipped: "skipped", not_checked: "NOT checked"};
+  let h = "";
+  (d.warnings || []).forEach(w => h += `<div class="warn">${esc(w)}</div>`);
+  h += `<section class="card"><div class="risk">
+    <div class="gauge"><svg width="130" height="130" viewBox="0 0 130 130"><circle cx="65" cy="65" r="52" fill="none" stroke="var(--line)" stroke-width="12"/>
+    <circle cx="65" cy="65" r="52" fill="none" stroke="${esc(r.color)}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>
+    <div class="v">${r.score}</div></div>
+    <div style="flex:1;min-width:220px"><span class="badge" style="background:${esc(r.color)}">${esc(r.level)} risk</span>
+    <p style="margin:8px 0 4px">${esc(r.summary)}</p>
+    <p class="mute" style="margin:0">Likely type: ${esc(d.actions.scam_type)}. Heuristic estimate, not a guarantee.</p></div></div>
+    <div class="pills" style="margin-top:14px">${d.checks.map(c => `<span class="pill ${esc(c.status)}" title="${esc(c.detail)}">${esc(c.name)}: ${stepLabel[c.status] || esc(c.status)}</span>`).join("")}</div>
+    <details><summary>How the score was calculated</summary>${ul(r.breakdown)}</details></section>`;
+  if (d.screenshot) h += `<section class="card"><h2>📸 What the screenshot says</h2>
+    <p><b>Looks like:</b> ${esc(d.screenshot.kind)}${d.screenshot.sender ? " from <b>" + esc(d.screenshot.sender) + "</b>" : ""}</p>
+    <p>${esc(d.screenshot.summary || "(no summary)")}</p>
+    <details><summary>Text extracted</summary><pre>${esc(d.screenshot.transcript || "(no readable text)")}</pre></details></section>`;
+  if (d.explanation) h += `<section class="card"><h2>🤖 Agent's explanation</h2>${md(d.explanation)}</section>`;
+
+  let flags = d.red_flags.map(f => `<div class="flag"><b>${esc(f.label)}</b> <span class="mute">found: ${f.evidence.map(esc).join(", ")}</span><small>${esc(f.why)}</small></div>`).join("");
+  d.links.forEach(l => flags += `<div class="flag"><b>Link</b> <code>${esc(l.url)}</code>${l.findings.length ? ul(l.findings) : "<small>No warning signs in the address itself (not opened or verified).</small>"}</div>`);
+  const sc = d.sender_check;
+  if (sc.findings.length) flags += `<div class="flag"><b>Sender</b> <code>${esc(d.sender)}</code>${ul(sc.findings)}</div>`;
+  (d.domain_age.checked || []).forEach(c => flags += `<div class="flag"><b>Domain age</b> <code>${esc(c.domain)}</code> was registered ${c.age_days} day(s) ago.</div>`);
+  (d.reputation.flagged || []).forEach(f => flags += `<div class="flag" style="border-color:var(--bad)"><b>Google Safe Browsing flagged</b> <code>${esc(f.url)}</code><small>${f.threat_types.map(esc).join(", ")}</small></div>`);
+  d.similar_scams.slice(0, 2).forEach(s => flags += `<div class="flag"><b>Resembles a known scam script</b> <span class="mute">${Math.round(s.similarity * 100)}% similar: ${esc(s.type)}</span></div>`);
+  const a = d.actions;
+  h += `<div class="grid"><section class="card"><h2>🚩 What we found</h2>${flags || "<p class='mute'>No red flags matched. That doesn't prove the message is safe.</p>"}</section>
+    <section class="card"><h2>✅ What to do</h2><b>Do now</b>${ul(a.do_now)}<b>Do not</b>${ul(a.do_not)}<b>If you already clicked, paid or replied</b>${ul(a.if_already_responded)}<b>Report it</b>${ul(a.report_to)}</section></div>`;
+  const ev = Object.entries(d.evidence).filter(([, v]) => v.length);
+  h += `<section class="card"><h2>📝 Draft report</h2><p class="mute">Copy this into your bank's fraud form or the cybercrime portal.${ev.length ? "" : ""}</p>
+    <pre id="rep">${esc(d.report)}</pre><button class="btn ghost" id="copy">Copy report</button></section>`;
+  h += `<section class="card"><details><summary>How the agent investigated</summary><ol class="tr">${d.trace.map(t => `<li><b>${esc(t.label)}</b>: ${esc(t.summary)}</li>`).join("") || "<li>The AI agent did not run.</li>"}</ol></details></section>
+    <p style="text-align:center"><button class="btn" id="again">Check another message</button></p>`;
+  $("out").innerHTML = h;
+  $("copy").onclick = () => { navigator.clipboard.writeText(d.report); $("copy").textContent = "Copied ✓"; };
+  $("again").onclick = () => { $("out").innerHTML = ""; files = []; renderFiles(); $("text").value = ""; window.scrollTo({top: 0, behavior: "smooth"}); };
+  $("out").scrollIntoView({behavior: "smooth"});
+}
+
+$("go").onclick = async () => {
+  $("err").textContent = ""; $("out").innerHTML = "";
+  const text = $("text").value.trim();
+  if (!text && !files.length) { $("err").textContent = "Add a screenshot, file or some text first."; return; }
+  const fd = new FormData(); fd.append("text", text); files.forEach(f => fd.append("files", f));
+  $("go").disabled = true;
+  const steps = files.length ? ["Reading your upload...", "Agent is running its tools...", "Checking links and sender...", "Scoring the risk..."]
+                             : ["Agent is running its tools...", "Checking links and sender...", "Scoring the risk..."];
+  let i = 0; $("status").textContent = steps[0];
+  const timer = setInterval(() => { i = Math.min(i + 1, steps.length - 1); $("status").textContent = steps[i]; }, 3500);
+  try {
+    const res = await fetch(API + "/api/analyze", {method: "POST", body: fd});
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || `Request failed (${res.status})`);
+    render(data);
+  } catch (e) { $("err").textContent = e.message || "Something went wrong."; }
+  finally { clearInterval(timer); $("status").textContent = ""; $("go").disabled = false; }
+};
+</script>
+</body>
+</html>

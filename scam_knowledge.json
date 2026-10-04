@@ -1,0 +1,237 @@
+{
+  "_about": "Editable ScamShield knowledge base. Add phrases, scam types or brands freely. Phrase matching is case-insensitive and matches word starts (so 'suspend' also matches 'suspended').",
+
+  "signal_categories": {
+    "urgency": {
+      "label": "Artificial urgency",
+      "weight": 15,
+      "why": "Scammers rush you so you act before thinking or checking with anyone.",
+      "patterns": ["urgent", "immediately", "act now", "right away", "within 24 hours", "within 2 hours", "last chance", "final notice", "final warning", "expires today", "expires soon", "hurry", "limited time", "asap", "before midnight", "today only", "respond now"]
+    },
+    "threats": {
+      "label": "Threat or fear tactic",
+      "weight": 20,
+      "why": "Threats of lost access, fines or arrest are used to scare you into complying.",
+      "patterns": ["account will be suspended", "account suspended", "account blocked", "account locked", "account will be closed", "suspend", "deactivated", "legal action", "arrest", "warrant", "police case", "penalty", "fine of", "your sim will be", "services will be discontinued", "will be blocked", "unauthorized login", "unusual activity", "suspicious activity", "compromised", "disconnected tonight", "electricity will be"]
+    },
+    "financial_request": {
+      "label": "Request for money or payment",
+      "weight": 25,
+      "why": "Unexpected requests to send, pay or 'verify' money are the core goal of most scams.",
+      "patterns": ["send money", "transfer", "pay a fee", "processing fee", "registration fee", "customs fee", "clearance fee", "release fee", "pay now", "deposit", "advance payment", "refundable deposit", "pay the amount", "payment is required", "small fee", "tax payment", "unpaid toll", "outstanding balance", "collect request", "approve the request", "accept the payment request", "scan this qr"]
+    },
+    "credential_request": {
+      "label": "Request for passwords, OTP, PIN or personal data",
+      "weight": 25,
+      "why": "Real organisations never ask you to share OTPs, PINs, passwords or full card details by message or phone.",
+      "patterns": ["otp", "one-time password", "one time password", "verification code", "pin", "password", "cvv", "card number", "card details", "bank details", "account number", "login details", "verify your account", "verify your identity", "confirm your identity", "update your kyc", "kyc", "update your details", "aadhaar", "social security", "ssn", "passport", "security code", "seed phrase", "recovery phrase"]
+    },
+    "prize_reward": {
+      "label": "Unexpected prize, refund or reward",
+      "weight": 20,
+      "why": "You can't win a contest you never entered. Fake rewards and refunds are bait.",
+      "patterns": ["you have won", "you've won", "congratulations", "winner", "lottery", "lucky draw", "prize", "claim your", "reward points", "gift card", "free gift", "cashback", "refund is pending", "refund of", "you are selected", "selected for", "inheritance", "unclaimed funds"]
+    },
+    "impersonation": {
+      "label": "Claims to be a bank, government, courier or company",
+      "weight": 15,
+      "why": "Scammers borrow the names of trusted organisations to look legitimate.",
+      "patterns": ["bank", "customer care", "customer support", "support team", "security team", "fraud department", "income tax", "tax department", "revenue", "customs", "courier", "fedex", "dhl", "ups", "usps", "india post", "amazon", "paypal", "microsoft", "apple support", "netflix", "government", "police", "cyber crime", "electricity board", "irs", "hmrc", "social security administration", "your company ceo", "hr department"]
+    },
+    "secrecy_isolation": {
+      "label": "Asks for secrecy",
+      "weight": 15,
+      "why": "Telling you not to talk to anyone stops friends, family or your bank from spotting the scam.",
+      "patterns": ["do not tell", "don't tell", "keep this confidential", "keep this secret", "do not share this with", "don't share this with", "between us", "do not inform", "do not contact your bank", "do not hang up"]
+    },
+    "unusual_payment": {
+      "label": "Unusual payment method",
+      "weight": 20,
+      "why": "Gift cards, crypto, wire transfers and payment apps are hard to reverse, so scammers prefer them.",
+      "patterns": ["gift card", "itunes card", "google play card", "bitcoin", "btc", "crypto", "usdt", "wire transfer", "western union", "moneygram", "zelle", "cash app", "upi", "paytm", "phonepe", "gpay", "google pay", "venmo", "binance", "wallet address"]
+    },
+    "off_platform": {
+      "label": "Pushes you to another app or channel",
+      "weight": 10,
+      "why": "Moving the chat to WhatsApp or Telegram takes you away from platform protections and reporting.",
+      "patterns": ["whatsapp", "telegram", "text me on", "message me on", "contact me on", "add me on", "join our group", "join the channel", "signal app"]
+    },
+    "too_good_to_be_true": {
+      "label": "Too-good-to-be-true offer",
+      "weight": 15,
+      "why": "Guaranteed high returns or easy money for little work are classic scam hooks.",
+      "patterns": ["guaranteed returns", "guaranteed profit", "double your money", "risk-free", "risk free", "100% profit", "daily income", "earn per day", "earn $", "earn rs", "earn ₹", "work from home", "no experience needed", "easy money", "passive income", "high returns", "per task", "like videos", "limited slots"]
+    }
+  },
+
+  "scam_types": {
+    "bank_phishing": {
+      "name": "Bank / account phishing",
+      "description": "A fake alert pretending to be your bank, card issuer or payment app to steal logins, OTPs or card data.",
+      "keywords": ["bank", "account", "debit card", "credit card", "blocked", "suspended", "verify", "login", "otp", "kyc", "net banking", "netbanking", "unusual activity"],
+      "do_now": [
+        "Do not click the link or call any number in the message.",
+        "Open your bank's official app or type its website address yourself to check for real alerts.",
+        "If worried, call the number printed on the back of your card."
+      ],
+      "do_not": ["Share OTPs, PINs, CVV or passwords with anyone, including 'bank staff'.", "Install any app the sender asks you to install."],
+      "if_already_responded": ["Call your bank immediately and block cards or net banking.", "Change your banking password and PIN from a trusted device.", "Check recent transactions and report any you don't recognise."]
+    },
+    "delivery_scam": {
+      "name": "Fake delivery / parcel notice",
+      "description": "A text or email about a missed delivery or customs fee that leads to a fake payment or login page.",
+      "keywords": ["parcel", "package", "delivery", "courier", "shipment", "customs", "tracking", "address", "redelivery", "reschedule", "postal"],
+      "do_now": [
+        "Ignore the link. Check the order in the shop's or courier's official app or website.",
+        "Compare the tracking number with one from an order you actually placed."
+      ],
+      "do_not": ["Pay 'redelivery' or 'customs' fees through a link in a message.", "Enter card details on a page you reached from the message."],
+      "if_already_responded": ["Contact your card issuer to block the card and dispute the charge.", "Watch for follow-up calls pretending to be your bank."]
+    },
+    "prize_lottery": {
+      "name": "Prize / lottery / refund scam",
+      "description": "You are told you've won something or are owed a refund, but must pay a fee or share details to get it.",
+      "keywords": ["won", "winner", "lottery", "prize", "lucky draw", "claim", "gift", "refund", "reward", "selected", "congratulations"],
+      "do_now": ["Delete the message. Real prizes don't require upfront fees.", "Ask yourself if you actually entered that contest."],
+      "do_not": ["Pay any 'tax', 'fee' or 'courier charge' to receive a prize.", "Send ID documents or bank details."],
+      "if_already_responded": ["Stop all contact with the sender.", "If you paid, contact your bank or payment app right away and report it.", "Watch for repeat 'recovery' scams promising to get your money back for a fee."]
+    },
+    "job_task_scam": {
+      "name": "Fake job / task scam",
+      "description": "Unsolicited job offers with easy pay, often asking you to do small paid tasks, then to deposit your own money.",
+      "keywords": ["job", "hiring", "work from home", "part-time", "part time", "per day", "per task", "salary", "task", "commission", "recruiter", "like videos", "interview", "telegram", "whatsapp"],
+      "do_now": ["Verify the company and recruiter on the company's official careers page.", "Treat unsolicited offers of high pay for easy work as a red flag."],
+      "do_not": ["Pay any fee for a job, training or equipment.", "Deposit money to 'unlock' tasks or earnings."],
+      "if_already_responded": ["Stop depositing money. Earnings shown in the app are usually fake.", "Report the account or group to the platform and to the authorities."]
+    },
+    "investment_crypto": {
+      "name": "Investment / crypto scam",
+      "description": "Promises of guaranteed or very high returns, often via a 'trading expert', fake app or group.",
+      "keywords": ["invest", "investment", "crypto", "bitcoin", "trading", "returns", "profit", "forex", "stock tips", "usdt", "binance", "wallet", "mining", "guaranteed", "double"],
+      "do_now": ["Remember that guaranteed returns do not exist.", "Check whether the firm is registered with your financial regulator.", "Talk to someone you trust before moving any money."],
+      "do_not": ["Transfer money to personal accounts or wallets.", "Install trading apps from links or unofficial stores."],
+      "if_already_responded": ["Stop sending funds, even if told you must pay fees to withdraw.", "Keep screenshots, transaction IDs and wallet addresses as evidence and report them."]
+    },
+    "romance_scam": {
+      "name": "Romance / relationship scam",
+      "description": "Someone builds an emotional bond online, then invents an emergency or investment that needs your money.",
+      "keywords": ["darling", "sweetheart", "my love", "lonely", "soulmate", "trust me", "overseas", "stuck abroad", "hospital", "emergency money", "can't video call", "widow", "military"],
+      "do_now": ["Insist on a live video call. Many scammers refuse.", "Do a reverse image search on their photos.", "Tell a friend or family member about the situation."],
+      "do_not": ["Send money, gift cards or crypto to someone you haven't met in person.", "Share intimate photos or ID documents."],
+      "if_already_responded": ["Stop sending money and cut contact.", "Report the profile to the platform and keep all chat history as evidence."]
+    },
+    "tech_support": {
+      "name": "Tech support / remote access scam",
+      "description": "A pop-up, call or message claims your device is infected and pushes you to install remote-access software or pay for fake help.",
+      "keywords": ["virus", "infected", "hacked", "microsoft", "apple support", "tech support", "remote access", "anydesk", "teamviewer", "computer", "device", "malware", "license expired"],
+      "do_now": ["Close the pop-up or hang up. Real companies don't cold-call about viruses.", "Run a scan with security software you already trust."],
+      "do_not": ["Install AnyDesk, TeamViewer or similar tools at a stranger's request.", "Pay with gift cards or give card details."],
+      "if_already_responded": ["Uninstall the remote-access tool and disconnect from the internet.", "Change passwords from a clean device and call your bank if you shared financial details."]
+    },
+    "government_impersonation": {
+      "name": "Government / authority impersonation",
+      "description": "Someone claims to be police, customs, tax or a regulator and demands payment or personal data, sometimes threatening arrest.",
+      "keywords": ["police", "arrest", "warrant", "customs", "tax", "income tax", "irs", "cyber crime", "cbi", "narcotics", "court", "legal action", "digital arrest", "government", "aadhaar", "sim"],
+      "do_now": ["Hang up or ignore it. Real agencies don't demand payment by phone, text or gift card.", "Call the agency using the official number from its website."],
+      "do_not": ["Stay on a video call because you are told you're under 'digital arrest'. No such legal process exists.", "Transfer money to 'verify' or 'clear' yourself."],
+      "if_already_responded": ["Report it immediately to your bank and the cybercrime authorities.", "Tell a family member. Isolation is part of this scam."]
+    },
+    "family_emergency": {
+      "name": "Family / friend emergency scam",
+      "description": "A message from an unknown number claims to be a relative or friend in trouble and needs money quickly.",
+      "keywords": ["mom", "dad", "mum", "new number", "lost my phone", "in trouble", "accident", "hospital", "bail", "need money", "don't tell", "hi mum", "hi dad"],
+      "do_now": ["Call the person on their usual number, or ask another relative.", "Ask a question only the real person would know."],
+      "do_not": ["Send money based on a text alone.", "Keep it secret as the message asks."],
+      "if_already_responded": ["Contact your bank to try to stop or recall the transfer.", "Report the number and warn other family members."]
+    },
+    "marketplace_overpayment": {
+      "name": "Marketplace / overpayment scam",
+      "description": "A fake buyer or seller on a classifieds or marketplace site sends a fake payment, asks you to refund the 'extra', or asks you to pay first.",
+      "keywords": ["olx", "marketplace", "buyer", "seller", "advance", "payment request", "refund the difference", "overpaid", "shipping agent", "collect request", "qr code", "army", "transfer to my agent"],
+      "do_now": ["Meet in person where possible and check the item before paying.", "Confirm that money has actually arrived in your account before handing over goods."],
+      "do_not": ["Scan a QR code or approve a collect request to 'receive' money. Receiving money never needs a PIN.", "Refund an 'overpayment' before the original payment clears."],
+      "if_already_responded": ["Call your bank or payment app right away to dispute the transaction.", "Report the listing and user to the platform."]
+    }
+  },
+
+  "url_rules": {
+    "shorteners": ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "buff.ly", "rebrand.ly", "cutt.ly", "shorturl.at", "tiny.cc", "rb.gy", "t.ly", "s.id", "lnkd.in"],
+    "suspicious_tlds": ["xyz", "top", "click", "link", "work", "support", "live", "icu", "buzz", "rest", "gq", "cf", "tk", "ml", "ga", "cyou", "sbs", "monster", "vip", "site", "online", "shop", "cfd", "zip", "mov"],
+    "suspicious_keywords": ["login", "signin", "verify", "secure", "update", "account", "wallet", "claim", "reward", "kyc", "refund", "payment", "confirm", "unlock", "bonus"],
+    "two_part_suffixes": ["co.in", "org.in", "net.in", "gov.in", "co.uk", "org.uk", "gov.uk", "com.au", "co.nz", "co.za", "com.br"],
+    "brands": {
+      "paypal": ["paypal.com"],
+      "amazon": ["amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazonaws.com"],
+      "microsoft": ["microsoft.com", "live.com", "office.com", "outlook.com"],
+      "apple": ["apple.com", "icloud.com"],
+      "google": ["google.com", "gmail.com", "google.co.in", "goo.gl"],
+      "netflix": ["netflix.com"],
+      "facebook": ["facebook.com", "fb.com", "meta.com"],
+      "instagram": ["instagram.com"],
+      "whatsapp": ["whatsapp.com", "wa.me"],
+      "sbi": ["sbi.co.in", "onlinesbi.sbi", "sbi.bank.in"],
+      "hdfc": ["hdfcbank.com", "hdfc.com"],
+      "icici": ["icicibank.com"],
+      "axis": ["axisbank.com"],
+      "paytm": ["paytm.com"],
+      "phonepe": ["phonepe.com"],
+      "fedex": ["fedex.com"],
+      "dhl": ["dhl.com"],
+      "usps": ["usps.com"],
+      "indiapost": ["indiapost.gov.in"],
+      "irs": ["irs.gov"],
+      "incometax": ["incometax.gov.in"]
+    }
+  },
+
+  "risk_levels": [
+    {"min": 0,  "level": "Low",      "color": "#2e7d32", "summary": "No strong scam signals found, but that doesn't prove the message is safe."},
+    {"min": 25, "level": "Medium",   "color": "#f9a825", "summary": "Some warning signs. Verify through an official channel before acting."},
+    {"min": 50, "level": "High",     "color": "#ef6c00", "summary": "Multiple scam signals. Do not respond, click or pay."},
+    {"min": 75, "level": "Critical", "color": "#c62828", "summary": "Very likely a scam. Do not engage. Protect your accounts and report it."}
+  ],
+
+  "general_actions": {
+    "do_now": [
+      "Don't click links, open attachments or call numbers in the message.",
+      "Contact the organisation through an official website, app or number you find yourself.",
+      "Talk to someone you trust before acting on anything urgent."
+    ],
+    "do_not": ["Share OTPs, PINs, passwords or card details.", "Send money or gift cards because a message told you to."],
+    "if_already_responded": [
+      "Contact your bank or payment provider right away.",
+      "Change passwords for any account you may have exposed.",
+      "Keep screenshots and transaction details for your report."
+    ]
+  },
+
+  "reporting_resources": [
+    "India: call 1930 or report at cybercrime.gov.in (National Cyber Crime Reporting Portal).",
+    "USA: report at reportfraud.ftc.gov.",
+    "Elsewhere: your bank's fraud team (use the number on your card) and your local police cybercrime unit or national fraud reporting service.",
+    "Forward scam texts or emails to the platform or carrier's spam reporting option."
+  ]
+  ,
+
+  "known_scripts": [
+    {"type": "bank_phishing", "text": "Dear customer your bank account will be blocked today. Update your KYC immediately by clicking the link to avoid suspension."},
+    {"type": "bank_phishing", "text": "Unusual activity detected on your card. Verify your identity now or your account will be locked. Share the OTP we sent you."},
+    {"type": "delivery_scam", "text": "Your parcel could not be delivered due to an incomplete address. Pay a small redelivery fee using this link to reschedule."},
+    {"type": "delivery_scam", "text": "Customs fee pending for your package. Pay now to release the shipment or it will be returned to sender."},
+    {"type": "prize_lottery", "text": "Congratulations you have won a lucky draw prize. Claim your reward now by paying the processing fee."},
+    {"type": "prize_lottery", "text": "You have been selected to receive a free gift card. Click the link to claim it before it expires."},
+    {"type": "job_task_scam", "text": "Part time job offer earn per day working from home. No experience needed. Message us on WhatsApp to start earning today."},
+    {"type": "job_task_scam", "text": "Complete simple tasks like liking videos and earn commission. Deposit money to unlock the next task."},
+    {"type": "investment_crypto", "text": "Join our trading group for guaranteed daily profit. Our expert will double your money with crypto investment. Limited slots."},
+    {"type": "romance_scam", "text": "I am stuck abroad and need money for an emergency. Please send gift cards or crypto, I will pay you back, trust me."},
+    {"type": "tech_support", "text": "Warning your computer is infected with a virus. Call Microsoft support immediately and install remote access software."},
+    {"type": "government_impersonation", "text": "This is the cyber crime police. A parcel in your name contains illegal items. You are under digital arrest. Stay on the video call and transfer money to verify."},
+    {"type": "government_impersonation", "text": "Your income tax refund is pending. Verify your bank details through this link to receive the refund."},
+    {"type": "family_emergency", "text": "Hi mum this is my new number my phone is broken. I am in trouble and need money urgently, do not tell dad."},
+    {"type": "marketplace_overpayment", "text": "I am interested in your item and will pay in advance. Accept the collect request or scan this QR code to receive the payment."}
+  ],
+
+  "sender_rules": {
+    "free_email_domains": ["gmail.com", "yahoo.com", "yahoo.in", "outlook.com", "hotmail.com", "live.com", "aol.com", "proton.me", "protonmail.com", "icloud.com", "rediffmail.com", "mail.com", "gmx.com", "yandex.com"]
+  }
+}
