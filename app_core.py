@@ -684,21 +684,57 @@ Rules: state only facts the tools returned. You never opened any links, so never
 # --------------------------------------------------------------------------
 # 9. Agent
 # --------------------------------------------------------------------------
-@lru_cache(maxsize=1)
-def get_model():
+# Models used in order. The first is the primary model; the rest are fallbacks.
+FALLBACK_MODELS = [
+    m.strip()
+    for m in os.environ.get(
+        "GEMINI_FALLBACK_MODELS",
+        "gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite"
+    ).split(",")
+    if m.strip()
+]
+
+MODEL_CHAIN = list(dict.fromkeys([MODEL_NAME, *FALLBACK_MODELS]))
+
+
+@lru_cache(maxsize=8)
+def get_model(model_name=MODEL_NAME):
     from langchain_google_genai import ChatGoogleGenerativeAI
-    return ChatGoogleGenerativeAI(model=MODEL_NAME, google_api_key=get_api_key(), max_retries=2)
+    return ChatGoogleGenerativeAI(
+        model=model_name,
+        google_api_key=get_api_key(),
+        max_retries=0,
+    )
 
 
-def build_agent(case):
+def build_agent(case, model_name):
     tools = make_tools(case)
     try:
         from langchain.agents import create_agent
-        return create_agent(get_model(), tools, system_prompt=SYSTEM_PROMPT)
+        return create_agent(
+            get_model(model_name),
+            tools,
+            system_prompt=SYSTEM_PROMPT
+        )
     except ImportError:  # older LangChain / LangGraph setups
         from langgraph.prebuilt import create_react_agent
-        return create_react_agent(get_model(), tools, prompt=SYSTEM_PROMPT)
+        return create_react_agent(
+            get_model(model_name),
+            tools,
+            prompt=SYSTEM_PROMPT
+        )
 
+
+def _is_retryable_model_error(exc):
+    msg = str(exc).upper()
+    return any(code in msg for code in (
+        "429",
+        "RESOURCE_EXHAUSTED",
+        "503",
+        "UNAVAILABLE",
+        "500",
+        "INTERNAL"
+    ))
 
 def _text(content):
     if isinstance(content, str):
@@ -708,27 +744,54 @@ def _text(content):
                        for b in content if isinstance(b, str) or (isinstance(b, dict) and b.get("type", "text") == "text"))
     return str(content)
 
-
 def run_agent(case, from_files=False):
-    """Returns (final_text, [tool names in call order])."""
-    agent = build_agent(case)
+    """Try Gemini models in order and fall back when a model is unavailable."""
     origin = " (extracted from files or a screenshot the user uploaded)" if from_files else ""
+
     prompt = f"Investigate this content{origin}."
     if case.sender:
         prompt += f"\nSender shown: {case.sender}"
     prompt += f"\n<message>\n{case.message}\n</message>"
-    result = agent.invoke({"messages": [{"role": "user", "content": prompt}]},
-                          config={"recursion_limit": 40})
-    order, final = [], ""
-    for m in result["messages"]:
-        mtype = getattr(m, "type", "")
-        if mtype == "tool" and getattr(m, "name", ""):
-            order.append(m.name)
-        elif mtype == "ai":
-            t = _text(m.content).strip()
-            if t:
-                final = t
-    return final, order
+
+    last_error = None
+
+    for model_name in MODEL_CHAIN:
+        try:
+            agent = build_agent(case, model_name)
+
+            result = agent.invoke(
+                {"messages": [{"role": "user", "content": prompt}]},
+                config={"recursion_limit": 40}
+            )
+
+            order, final = [], ""
+
+            for m in result["messages"]:
+                mtype = getattr(m, "type", "")
+
+                if mtype == "tool" and getattr(m, "name", ""):
+                    order.append(m.name)
+
+                elif mtype == "ai":
+                    t = _text(m.content).strip()
+                    if t:
+                        final = t
+
+            if final:
+                return final, order
+
+        except Exception as exc:
+            last_error = exc
+
+            if _is_retryable_model_error(exc):
+                continue
+
+            raise
+
+    if last_error:
+        raise last_error
+
+    raise RuntimeError("No Gemini model was available.")
 
 
 # --------------------------------------------------------------------------
@@ -832,6 +895,47 @@ def _parse_json_loose(raw):
 
 
 def read_screenshots(images_b64):
+    from langchain_core.messages import HumanMessage
+
+    content = [{"type": "text", "text": VISION_PROMPT}]
+    content += [
+        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b}"}}
+        for b in images_b64
+    ]
+
+    last_error = None
+
+    for model_name in MODEL_CHAIN:
+        try:
+            response = get_model(model_name).invoke(
+                [HumanMessage(content=content)]
+            )
+
+            data = _parse_json_loose(_text(response.content))
+
+            if not isinstance(data, dict):
+                data = {}
+
+            return {
+                "kind": str(data.get("kind") or "screenshot"),
+                "sender": str(data.get("sender") or ""),
+                "transcript": str(data.get("transcript") or "").strip(),
+                "urls": [str(u) for u in (data.get("urls") or []) if u],
+                "summary": str(data.get("summary") or ""),
+            }
+
+        except Exception as exc:
+            last_error = exc
+
+            if _is_retryable_model_error(exc):
+                continue
+
+            raise
+
+    if last_error:
+        raise last_error
+
+    raise RuntimeError("No Gemini model was available for screenshot reading.")
     from langchain_core.messages import HumanMessage
 
     content = [{"type": "text", "text": VISION_PROMPT}]
